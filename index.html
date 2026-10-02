@@ -1,0 +1,400 @@
+<!DOCTYPE html>
+<html lang="hi">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
+  <title>Outdoor Sports Arena</title>
+  <style>
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+      user-select: none;
+      -webkit-user-select: none;
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+    }
+    body {
+      background: #0f172a;
+      color: #f8fafc;
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      overflow-x: hidden;
+    }
+    header {
+      width: 100%;
+      padding: 16px;
+      text-align: center;
+      background: #1e293b;
+      box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.3);
+      position: sticky;
+      top: 0;
+      z-index: 20;
+    }
+    header h1 {
+      font-size: 1.25rem;
+      letter-spacing: 1px;
+      color: #38bdf8;
+    }
+
+    /* Portal Home View */
+    #portalView {
+      width: 100%;
+      max-width: 480px;
+      padding: 20px 16px;
+      display: flex;
+      flex-direction: column;
+      gap: 16px;
+    }
+    .game-card {
+      background: #1e293b;
+      border: 1px solid #334155;
+      border-radius: 12px;
+      padding: 16px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      box-shadow: 0 2px 4px rgba(0,0,0,0.2);
+    }
+    .game-info h2 {
+      font-size: 1.1rem;
+      margin-bottom: 4px;
+      color: #f1f5f9;
+    }
+    .game-info p {
+      font-size: 0.8rem;
+      color: #94a3b8;
+    }
+    .btn-play {
+      background: #0284c7;
+      color: #fff;
+      border: none;
+      padding: 10px 16px;
+      border-radius: 8px;
+      font-weight: 600;
+      cursor: pointer;
+    }
+
+    /* Game Play View */
+    #gameView {
+      display: none;
+      flex-direction: column;
+      align-items: center;
+      width: 100%;
+      height: 100vh;
+      position: fixed;
+      top: 0;
+      left: 0;
+      background: #000;
+      z-index: 50;
+    }
+    .game-header {
+      width: 100%;
+      padding: 10px 16px;
+      background: #1e293b;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      font-size: 0.9rem;
+    }
+    .btn-back {
+      background: #475569;
+      color: #fff;
+      border: none;
+      padding: 6px 12px;
+      border-radius: 6px;
+      cursor: pointer;
+    }
+    canvas {
+      background: #14532d;
+      border: 3px solid #f8fafc;
+      margin: auto;
+      touch-action: none;
+    }
+
+    /* Multiplayer Room Modal */
+    #roomModal {
+      display: none;
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      background: rgba(0,0,0,0.7);
+      z-index: 100;
+      align-items: center;
+      justify-content: center;
+      padding: 20px;
+    }
+    .modal-box {
+      background: #1e293b;
+      border-radius: 12px;
+      padding: 20px;
+      width: 100%;
+      max-width: 340px;
+      text-align: center;
+      display: flex;
+      flex-direction: column;
+      gap: 12px;
+    }
+    .modal-box input {
+      padding: 10px;
+      border-radius: 6px;
+      border: 1px solid #475569;
+      background: #0f172a;
+      color: #fff;
+      font-size: 1rem;
+      text-align: center;
+    }
+    .btn-whatsapp {
+      background: #22c55e;
+      color: #fff;
+      padding: 10px;
+      border: none;
+      border-radius: 6px;
+      font-weight: bold;
+      cursor: pointer;
+    }
+    .btn-close {
+      background: transparent;
+      color: #94a3b8;
+      border: none;
+      cursor: pointer;
+    }
+  </style>
+</head>
+<body>
+
+  <!-- App Header -->
+  <header>
+    <h1>Outdoor Sports Arena</h1>
+  </header>
+
+  <!-- Portal / Game Selection Screen -->
+  <div id="portalView">
+    <div class="game-card">
+      <div class="game-info">
+        <h2>Table Tennis</h2>
+        <p>Offline Bot & Room Multiplayer</p>
+      </div>
+      <button class="btn-play" onclick="openGame('tt')">Play</button>
+    </div>
+
+    <div class="game-card" style="opacity: 0.6;">
+      <div class="game-info">
+        <h2>Badminton (Next)</h2>
+        <p>Smash & Drop Mechanics</p>
+      </div>
+      <button class="btn-play" disabled>Soon</button>
+    </div>
+
+    <div class="game-card" style="opacity: 0.6;">
+      <div class="game-info">
+        <h2>Football Penalty</h2>
+        <p>Swipe to Score</p>
+      </div>
+      <button class="btn-play" disabled>Soon</button>
+    </div>
+
+    <div class="game-card" style="opacity: 0.6;">
+      <div class="game-info">
+        <h2>Cricket Classic</h2>
+        <p>Timing Batting Game</p>
+      </div>
+      <button class="btn-play" disabled>Soon</button>
+    </div>
+  </div>
+
+  <!-- Table Tennis Game Engine Screen -->
+  <div id="gameView">
+    <div class="game-header">
+      <button class="btn-back" onclick="closeGame()">Exit</button>
+      <div>BOT: <span id="botScore">0</span> | YOU: <span id="playerScore">0</span></div>
+      <button class="btn-back" onclick="openRoomModal()" style="background:#0284c7;">Room</button>
+    </div>
+    <canvas id="gameCanvas" width="340" height="520"></canvas>
+  </div>
+
+  <!-- Multiplayer Room Dialog -->
+  <div id="roomModal">
+    <div class="modal-box">
+      <h3>Multiplayer Room</h3>
+      <p style="font-size:0.85rem; color:#94a3b8;">Room Code generate karke WhatsApp par dost ke sath share karein</p>
+      <input type="text" id="roomCodeInput" readonly value="TT-7892">
+      <button class="btn-whatsapp" onclick="shareWhatsApp()">Share on WhatsApp</button>
+      <input type="text" placeholder="Ya dost ka code daalein">
+      <button class="btn-play" onclick="alert('Multiplayer room connecting...')">Join Room</button>
+      <button class="btn-close" onclick="closeRoomModal()">Cancel</button>
+    </div>
+  </div>
+
+  <script>
+    const portalView = document.getElementById("portalView");
+    const gameView = document.getElementById("gameView");
+    const roomModal = document.getElementById("roomModal");
+    const canvas = document.getElementById("gameCanvas");
+    const ctx = canvas.getContext("2d");
+
+    let animationId;
+    let playerScore = 0;
+    let botScore = 0;
+
+    const paddleWidth = 70;
+    const paddleHeight = 12;
+
+    const player = {
+      x: canvas.width / 2 - paddleWidth / 2,
+      y: canvas.height - 30,
+      width: paddleWidth,
+      height: paddleHeight,
+      color: "#38bdf8"
+    };
+
+    const bot = {
+      x: canvas.width / 2 - paddleWidth / 2,
+      y: 18,
+      width: paddleWidth,
+      height: paddleHeight,
+      color: "#ef4444",
+      speed: 3.2
+    };
+
+    const ball = {
+      x: canvas.width / 2,
+      y: canvas.height / 2,
+      radius: 8,
+      speedX: 3,
+      speedY: 4,
+      color: "#facc15"
+    };
+
+    // Touch Event
+    canvas.addEventListener("touchmove", (e) => {
+      const rect = canvas.getBoundingClientRect();
+      const touchX = e.touches[0].clientX - rect.left;
+      player.x = touchX - player.width / 2;
+      if (player.x < 0) player.x = 0;
+      if (player.x + player.width > canvas.width) player.x = canvas.width - player.width;
+    });
+
+    function resetBall() {
+      ball.x = canvas.width / 2;
+      ball.y = canvas.height / 2;
+      ball.speedX = (Math.random() > 0.5 ? 1 : -1) * 3;
+      ball.speedY = (Math.random() > 0.5 ? 1 : -1) * 4;
+    }
+
+    function update() {
+      ball.x += ball.speedX;
+      ball.y += ball.speedY;
+
+      if (ball.x - ball.radius < 0 || ball.x + ball.radius > canvas.width) {
+        ball.speedX = -ball.speedX;
+      }
+
+      // Bot AI
+      const botCenter = bot.x + bot.width / 2;
+      if (botCenter < ball.x - 10) bot.x += bot.speed;
+      else if (botCenter > ball.x + 10) bot.x -= bot.speed;
+
+      if (bot.x < 0) bot.x = 0;
+      if (bot.x + bot.width > canvas.width) bot.x = canvas.width - bot.width;
+
+      // Player Collision
+      if (
+        ball.y + ball.radius >= player.y &&
+        ball.x >= player.x &&
+        ball.x <= player.x + player.width
+      ) {
+        ball.speedY = -Math.abs(ball.speedY);
+        const hitOffset = ball.x - (player.x + player.width / 2);
+        ball.speedX = hitOffset * 0.15;
+      }
+
+      // Bot Collision
+      if (
+        ball.y - ball.radius <= bot.y + bot.height &&
+        ball.x >= bot.x &&
+        ball.x <= bot.x + bot.width
+      ) {
+        ball.speedY = Math.abs(ball.speedY);
+      }
+
+      // Scoring
+      if (ball.y - ball.radius < 0) {
+        playerScore++;
+        document.getElementById("playerScore").innerText = playerScore;
+        resetBall();
+      } else if (ball.y + ball.radius > canvas.height) {
+        botScore++;
+        document.getElementById("botScore").innerText = botScore;
+        resetBall();
+      }
+    }
+
+    function render() {
+      ctx.fillStyle = "#14532d";
+      ctx.fillRect(0, 0, canvas.width, canvas.height);
+
+      // Court Lines
+      ctx.strokeStyle = "rgba(255,255,255,0.4)";
+      ctx.setLineDash([6, 6]);
+      ctx.beginPath();
+      ctx.moveTo(0, canvas.height / 2);
+      ctx.lineTo(canvas.width, canvas.height / 2);
+      ctx.stroke();
+      ctx.setLineDash([]);
+
+      // Paddles & Ball
+      ctx.fillStyle = player.color;
+      ctx.fillRect(player.x, player.y, player.width, player.height);
+
+      ctx.fillStyle = bot.color;
+      ctx.fillRect(bot.x, bot.y, bot.width, bot.height);
+
+      ctx.fillStyle = ball.color;
+      ctx.beginPath();
+      ctx.arc(ball.x, ball.y, ball.radius, 0, Math.PI * 2);
+      ctx.fill();
+    }
+
+    function loop() {
+      update();
+      render();
+      animationId = requestAnimationFrame(loop);
+    }
+
+    function openGame(gameType) {
+      if (gameType === 'tt') {
+        portalView.style.display = "none";
+        gameView.style.display = "flex";
+        resetBall();
+        loop();
+      }
+    }
+
+    function closeGame() {
+      cancelAnimationFrame(animationId);
+      gameView.style.display = "none";
+      portalView.style.display = "flex";
+    }
+
+    function openRoomModal() {
+      const randomCode = "TT-" + Math.floor(1000 + Math.random() * 9000);
+      document.getElementById("roomCodeInput").value = randomCode;
+      roomModal.style.display = "flex";
+    }
+
+    function closeRoomModal() {
+      roomModal.style.display = "none";
+    }
+
+    function shareWhatsApp() {
+      const code = document.getElementById("roomCodeInput").value;
+      const text = encodeURIComponent(`Mere sath Table Tennis khelo! Room code: ${code}`);
+      window.open(`https://wa.me/?text=${text}`, '_blank');
+    }
+  </script>
+</body>
+</html>
